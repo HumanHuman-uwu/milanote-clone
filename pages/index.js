@@ -66,7 +66,7 @@ export default function Home({resultData , testimonialResult, responseCompanyDat
 
 
 // Fetch data from our fake server build with json and getStaticProps
-
+/*
 export const getStaticProps = async () => {
   const requestData = await fetch('http://localhost:3000/api/corouselData')
   const resultData = await requestData.json()
@@ -82,4 +82,24 @@ export const getStaticProps = async () => {
       responseCompanyData
     }
   }
+}*/
+function getBaseUrl() {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
 }
+
+export const getStaticProps = async () => {
+  const baseUrl = getBaseUrl();
+
+  const [resultData, testimonialResult, responseCompanyData] = await Promise.all([
+    fetch(`${baseUrl}/api/corouselData`).then(r => r.json()),
+    fetch(`${baseUrl}/api/testimonialData`).then(r => r.json()),
+    fetch(`${baseUrl}/api/companyData`).then(r => r.json()),
+  ]);
+
+  return {
+    props: { resultData, testimonialResult, responseCompanyData },
+    // revalidate: 60,
+  };
+};
